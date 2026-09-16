@@ -1,350 +1,1406 @@
-/* -------------------------------- */
-/* BASIC PAGE SETUP                 */
-/* -------------------------------- */
+* {
+  box-sizing: border-box;
+}
 
 html,
 body,
 #root {
-    margin: 0;
-    padding: 0;
-
-    width: 100%;
-    height: 100%;
-
-    background: transparent;
+  width: 100%;
+  height: 100%;
+  margin: 0;
 }
 
 body {
-    overflow: hidden;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: transparent;
+  overflow: hidden;
 }
-
-
-/* -------------------------------- */
-/* MAIN DESKPILOT CONTAINER         */
-/* -------------------------------- */
 
 .deskpilot {
-    position: relative;
-
-    width: 100%;
-    height: 100%;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  pointer-events: none;
 }
 
 
-/* -------------------------------- */
-/* FLOATING ROBOT                   */
-/* -------------------------------- */
+/* =====================================================
+   AVATAR CONTAINER
+===================================================== */
 
 .avatar {
-    position: absolute;
+  position: absolute;
 
-    right: 15px;
-    bottom: 15px;
+  right: 25px;
+  bottom: 18px;
 
-    width: 170px;
+  width: 180px;
+  height: 235px;
 
-    display: flex;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-    flex-direction: column;
+  cursor: pointer;
 
-    align-items: center;
+  pointer-events: auto;
 
-    cursor: pointer;
+  user-select: none;
 
-    /*
-       IMPORTANT:
-       This allows the mouse click
-       to reach React.
-    */
-    -webkit-app-region: no-drag;
+  z-index: 1000;
 
-    z-index: 1000;
+  perspective: 800px;
+
+  transition: transform 0.3s ease;
+}
+
+.avatar:hover {
+  transform: translateY(-6px);
 }
 
 
-/* Robot emoji */
+/* =====================================================
+   ROBOT
+===================================================== */
 
 .robot {
-    font-size: 80px;
+  position: relative;
 
-    line-height: 1;
+  width: 150px;
+  height: 190px;
 
-    user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-    animation: floating 2s ease-in-out infinite;
+  transform-style: preserve-3d;
 
-    filter:
-        drop-shadow(
-            0 5px 8px rgba(0, 0, 0, 0.25)
-        );
+  animation: robotFloat 4s ease-in-out infinite;
 }
 
 
-/* DeskPilot name */
+/* =====================================================
+   ANTENNA
+===================================================== */
 
-.name {
-    margin-top: 8px;
+.antenna {
+  position: absolute;
 
-    padding: 7px 18px;
+  top: 0;
 
-    background: white;
+  width: 34px;
+  height: 38px;
 
-    border-radius: 25px;
+  z-index: 5;
+}
 
-    font-size: 17px;
+.antenna::before {
+  content: "";
 
-    font-weight: bold;
+  position: absolute;
 
-    color: #111;
+  left: 15px;
+  top: 13px;
 
-    user-select: none;
+  width: 5px;
+  height: 24px;
 
-    box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.20);
+  border-radius: 5px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #aeb9c8,
+      #ffffff,
+      #7e8da0
+    );
+
+  box-shadow:
+    0 0 6px rgba(
+      0,
+      200,
+      255,
+      0.5
+    );
+}
+
+.antenna-ball {
+  position: absolute;
+
+  top: 0;
+  left: 7px;
+
+  width: 20px;
+  height: 20px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #ffffff,
+      #73ecff 35%,
+      #12bde9 65%,
+      #087da9
+    );
+
+  box-shadow:
+    0 0 8px #18d8ff,
+    0 0 20px rgba(
+      0,
+      210,
+      255,
+      0.65
+    );
+
+  animation: antennaPulse 2s infinite;
 }
 
 
-/* -------------------------------- */
-/* ROBOT HOVER                      */
-/* -------------------------------- */
+/* =====================================================
+   ROBOT HEAD
+===================================================== */
 
-.avatar:hover .robot {
-    transform: scale(1.08);
+.robot-head {
+  position: absolute;
+
+  top: 25px;
+
+  width: 142px;
+  height: 108px;
+
+  border-radius: 42px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      #f5f8fc 40%,
+      #d6e0eb 100%
+    );
+
+  border:
+    1px solid rgba(
+      130,
+      150,
+      170,
+      0.5
+    );
+
+  box-shadow:
+    0 18px 30px rgba(
+      25,
+      45,
+      65,
+      0.25
+    ),
+    inset 0 2px 2px rgba(
+      255,
+      255,
+      255,
+      0.95
+    ),
+    inset 0 -8px 15px rgba(
+      100,
+      120,
+      140,
+      0.12
+    );
+
+  z-index: 3;
 }
 
-.avatar:hover .name {
-    box-shadow:
-        0 5px 18px rgba(0, 0, 0, 0.30);
+
+/* Head highlight */
+
+.head-shine {
+  position: absolute;
+
+  top: 5px;
+  left: 25px;
+
+  width: 75px;
+  height: 20px;
+
+  border-radius: 50%;
+
+  background: rgba(
+    255,
+    255,
+    255,
+    0.8
+  );
+
+  filter: blur(7px);
 }
 
 
-/* -------------------------------- */
-/* ASSISTANT PANEL                  */
-/* -------------------------------- */
+/* =====================================================
+   FACE SCREEN
+===================================================== */
+
+.face-screen {
+  position: absolute;
+
+  left: 20px;
+  top: 18px;
+
+  width: 102px;
+  height: 73px;
+
+  border-radius: 27px;
+
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      #172c3e,
+      #07131e 70%
+    );
+
+  border:
+    1px solid rgba(
+      130,
+      190,
+      220,
+      0.18
+    );
+
+  box-shadow:
+    inset 0 4px 12px rgba(
+      0,
+      0,
+      0,
+      0.45
+    ),
+    inset 0 -2px 8px rgba(
+      0,
+      210,
+      255,
+      0.08
+    ),
+    0 2px 4px rgba(
+      0,
+      0,
+      0,
+      0.2
+    );
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 28px;
+}
+
+
+/* =====================================================
+   EYES
+===================================================== */
+
+.eye {
+  width: 13px;
+  height: 25px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      ellipse at 50% 35%,
+      #ffffff,
+      #c8faff 35%,
+      #36dcff 75%
+    );
+
+  box-shadow:
+    0 0 7px #55e9ff,
+    0 0 18px rgba(
+      0,
+      215,
+      255,
+      0.7
+    );
+
+  animation: eyeBlink 5s infinite;
+}
+
+
+/* =====================================================
+   MOUTH
+===================================================== */
+
+.robot-mouth {
+  position: absolute;
+
+  bottom: 13px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  width: 25px;
+  height: 5px;
+
+  border-radius: 20px;
+
+  background: #dfffff;
+
+  box-shadow:
+    0 0 8px #36ddff;
+
+  transition:
+    width 0.15s,
+    height 0.15s;
+}
+
+
+/* =====================================================
+   EARS
+===================================================== */
+
+.ear {
+  position: absolute;
+
+  top: 32px;
+
+  width: 22px;
+  height: 42px;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #eef4fa,
+      #b9c7d6
+    );
+
+  border: 1px solid #aab9c8;
+
+  box-shadow:
+    0 5px 10px rgba(
+      0,
+      0,
+      0,
+      0.18
+    );
+}
+
+.ear-left {
+  left: -10px;
+}
+
+.ear-right {
+  right: -10px;
+}
+
+.ear-core {
+  position: absolute;
+
+  width: 13px;
+  height: 24px;
+
+  left: 4px;
+  top: 8px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      #63edff,
+      #0bbce9 55%,
+      #12658a
+    );
+
+  box-shadow:
+    0 0 8px #24d9ff;
+}
+
+
+/* =====================================================
+   NECK
+===================================================== */
+
+.neck {
+  position: absolute;
+
+  top: 128px;
+
+  width: 35px;
+  height: 18px;
+
+  border-radius: 0 0 14px 14px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #8f9eae,
+      #e8eef4,
+      #8999aa
+    );
+
+  z-index: 1;
+}
+
+
+/* =====================================================
+   BODY
+===================================================== */
+
+.robot-body {
+  position: absolute;
+
+  top: 137px;
+
+  width: 95px;
+  height: 58px;
+
+  border-radius: 38px 38px 25px 25px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #e5edf5 60%,
+      #c2ceda
+    );
+
+  border:
+    1px solid #b2c0ce;
+
+  box-shadow:
+    0 12px 20px rgba(
+      30,
+      50,
+      70,
+      0.22
+    ),
+    inset 0 2px 2px rgba(
+      255,
+      255,
+      255,
+      0.9
+    );
+
+  z-index: 2;
+}
+
+
+/* Body highlight */
+
+.body-shine {
+  position: absolute;
+
+  top: 5px;
+  left: 22px;
+
+  width: 45px;
+  height: 12px;
+
+  border-radius: 50%;
+
+  background: rgba(
+    255,
+    255,
+    255,
+    0.7
+  );
+
+  filter: blur(5px);
+}
+
+
+/* =====================================================
+   CHEST LIGHT
+===================================================== */
+
+.chest-light {
+  position: absolute;
+
+  left: 50%;
+  top: 18px;
+
+  transform: translateX(-50%);
+
+  width: 18px;
+  height: 18px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      #ffffff,
+      #52eaff 35%,
+      #08a9d9 70%
+    );
+
+  border: 2px solid #9cefff;
+
+  box-shadow:
+    0 0 8px #25dcff,
+    0 0 18px rgba(
+      0,
+      210,
+      255,
+      0.6
+    );
+}
+
+
+/* =====================================================
+   ARMS
+===================================================== */
+
+.arm {
+  position: absolute;
+
+  top: 8px;
+
+  width: 25px;
+  height: 42px;
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #f8fbff,
+      #c5d2df
+    );
+
+  border: 1px solid #aab9c8;
+
+  box-shadow:
+    0 6px 10px rgba(
+      0,
+      0,
+      0,
+      0.15
+    );
+}
+
+.arm-left {
+  left: -19px;
+
+  transform: rotate(18deg);
+}
+
+.arm-right {
+  right: -19px;
+
+  transform: rotate(-18deg);
+}
+
+
+/* =====================================================
+   HOVER BASE
+===================================================== */
+
+.hover-base {
+  position: absolute;
+
+  bottom: -2px;
+
+  width: 75px;
+  height: 16px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(
+        40,
+        220,
+        255,
+        0.65
+      ),
+      rgba(
+        40,
+        220,
+        255,
+        0.1
+      ) 60%,
+      transparent
+    );
+
+  filter: blur(2px);
+
+  animation: hoverPulse 2s infinite;
+}
+
+.hover-light {
+  position: absolute;
+
+  left: 10px;
+  right: 10px;
+  top: 5px;
+
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: #4ce6ff;
+
+  box-shadow:
+    0 0 12px #1bdcff,
+    0 0 25px rgba(
+      0,
+      210,
+      255,
+      0.8
+    );
+}
+
+
+/* =====================================================
+   ENERGY RINGS
+===================================================== */
+
+.energy {
+  position: absolute;
+
+  top: 145px;
+
+  width: 130px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  border: 2px solid rgba(
+    20,
+    210,
+    255,
+    0.35
+  );
+
+  transform: rotateX(65deg);
+
+  pointer-events: none;
+}
+
+.energy-1 {
+  animation: energyPulse 2.5s infinite;
+}
+
+.energy-2 {
+  width: 105px;
+  height: 32px;
+
+  opacity: 0.5;
+
+  animation: energyPulse 2.5s infinite 0.8s;
+}
+
+.energy-3 {
+  width: 80px;
+  height: 24px;
+
+  opacity: 0.4;
+
+  animation: energyPulse 2.5s infinite 1.5s;
+}
+
+
+/* =====================================================
+   BRAND
+===================================================== */
+
+.robot-brand {
+  position: absolute;
+
+  bottom: 17px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 18px;
+
+  font-weight: 650;
+
+  color: #182532;
+
+  letter-spacing: -0.2px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #15c9f3;
+
+  box-shadow:
+    0 0 8px rgba(
+      0,
+      210,
+      255,
+      0.8
+    );
+}
+
+
+/* =====================================================
+   ROBOT STATUS
+===================================================== */
+
+.robot-status {
+  position: absolute;
+
+  bottom: 0;
+
+  font-size: 12px;
+
+  color: #8a96a4;
+
+  letter-spacing: 0.3px;
+}
+
+
+/* =====================================================
+   STATE: LISTENING
+===================================================== */
+
+.avatar-listening .robot {
+  animation:
+    robotFloat 2s infinite,
+    listeningRobot 1s infinite;
+}
+
+.avatar-listening .energy {
+  border-color: rgba(
+    0,
+    215,
+    255,
+    0.8
+  );
+}
+
+.avatar-listening .eye {
+  box-shadow:
+    0 0 10px #4ce8ff,
+    0 0 28px #10cfff;
+}
+
+
+/* =====================================================
+   STATE: THINKING
+===================================================== */
+
+.avatar-thinking .robot {
+  animation:
+    robotFloat 3s infinite,
+    thinkingRobot 2s infinite;
+}
+
+.avatar-thinking .energy {
+  border-color: rgba(
+    160,
+    100,
+    255,
+    0.8
+  );
+
+  animation:
+    energyRotate 1.5s linear infinite;
+}
+
+.avatar-thinking .chest-light {
+  background:
+    radial-gradient(
+      circle,
+      #ffffff,
+      #b785ff 40%,
+      #7439dc
+    );
+
+  box-shadow:
+    0 0 10px #9d62ff,
+    0 0 25px rgba(
+      140,
+      70,
+      255,
+      0.8
+    );
+}
+
+
+/* =====================================================
+   STATE: SPEAKING
+===================================================== */
+
+.avatar-speaking .robot {
+  animation:
+    speakingRobot 0.55s infinite alternate;
+}
+
+.avatar-speaking .robot-mouth {
+  width: 27px;
+  height: 12px;
+
+  border-radius: 50%;
+}
+
+.avatar-speaking .hover-light {
+  animation: speakingLight 0.45s infinite alternate;
+}
+
+
+/* =====================================================
+   STATE: COMPLETED
+===================================================== */
+
+.avatar-completed .robot {
+  animation: completedRobot 0.7s ease;
+}
+
+.avatar-completed .chest-light {
+  background:
+    radial-gradient(
+      circle,
+      #ffffff,
+      #57e58a,
+      #16a85b
+    );
+
+  box-shadow:
+    0 0 10px #3ee77d,
+    0 0 25px rgba(
+      40,
+      220,
+      100,
+      0.7
+    );
+}
+
+
+/* =====================================================
+   STATE: ERROR
+===================================================== */
+
+.avatar-error .robot {
+  animation: errorRobot 0.4s;
+}
+
+.avatar-error .chest-light {
+  background:
+    radial-gradient(
+      circle,
+      #ffffff,
+      #ff7070,
+      #df2424
+    );
+
+  box-shadow:
+    0 0 10px #ff4545,
+    0 0 25px rgba(
+      255,
+      40,
+      40,
+      0.7
+    );
+}
+
+
+/* =====================================================
+   ANIMATIONS
+===================================================== */
+
+@keyframes robotFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes antennaPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes eyeBlink {
+  0%,
+  45%,
+  48%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  46%,
+  47% {
+    transform: scaleY(0.08);
+  }
+}
+
+@keyframes hoverPulse {
+  0%,
+  100% {
+    transform: scaleX(0.85);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: scaleX(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes energyPulse {
+  0% {
+    transform:
+      rotateX(65deg)
+      scale(0.75);
+
+    opacity: 0;
+  }
+
+  35% {
+    opacity: 0.7;
+  }
+
+  100% {
+    transform:
+      rotateX(65deg)
+      scale(1.35);
+
+    opacity: 0;
+  }
+}
+
+@keyframes energyRotate {
+  from {
+    transform:
+      rotateX(65deg)
+      rotateZ(0deg);
+  }
+
+  to {
+    transform:
+      rotateX(65deg)
+      rotateZ(360deg);
+  }
+}
+
+@keyframes listeningRobot {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-3px) scale(1.025);
+  }
+}
+
+@keyframes thinkingRobot {
+  0%,
+  100% {
+    transform:
+      translateY(0)
+      rotate(-2deg);
+  }
+
+  50% {
+    transform:
+      translateY(-5px)
+      rotate(2deg);
+  }
+}
+
+@keyframes speakingRobot {
+  from {
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    transform: translateY(-3px) scale(1.04);
+  }
+}
+
+@keyframes speakingLight {
+  from {
+    opacity: 0.6;
+    transform: scaleX(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleX(1.15);
+  }
+}
+
+@keyframes completedRobot {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes errorRobot {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+
+/* =====================================================
+   ASSISTANT PANEL
+===================================================== */
 
 .assistant-panel {
-    position: absolute;
+  position: absolute;
 
-    right: 15px;
-    bottom: 185px;
+  right: 28px;
+  bottom: 245px;
 
-    width: 320px;
+  width: 365px;
+  max-height: 620px;
 
-    background: white;
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.96
+    );
 
-    border-radius: 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 
-    overflow: hidden;
+  border:
+    1px solid rgba(
+      255,
+      255,
+      255,
+      0.9
+    );
 
-    box-shadow:
-        0 10px 40px rgba(0, 0, 0, 0.25);
+  border-radius: 22px;
 
-    z-index: 2000;
+  overflow: hidden;
 
-    -webkit-app-region: no-drag;
+  box-shadow:
+    0 25px 70px rgba(
+      0,
+      0,
+      0,
+      0.2
+    );
 
-    animation: panelAppear 0.2s ease-out;
+  z-index: 2000;
+
+  pointer-events: auto;
+
+  animation: panelAppear 0.25s ease;
+}
+
+@keyframes panelAppear {
+  from {
+    opacity: 0;
+    transform:
+      translateY(15px)
+      scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
 }
 
 
-/* -------------------------------- */
-/* PANEL HEADER                     */
-/* -------------------------------- */
+/* =====================================================
+   PANEL HEADER
+===================================================== */
 
 .panel-header {
-    height: 55px;
+  display: flex;
 
-    display: flex;
+  justify-content: space-between;
+  align-items: center;
 
-    align-items: center;
+  padding: 16px 18px;
 
-    justify-content: space-between;
-
-    padding: 0 18px;
-
-    background: #f8f8f8;
-
-    border-bottom:
-        1px solid #e5e5e5;
-
-    font-size: 18px;
-
-    font-weight: bold;
+  border-bottom:
+    1px solid #edf0f3;
 }
 
+.panel-title {
+  display: flex;
+  align-items: center;
 
-/* Close button */
+  gap: 10px;
+}
+
+.panel-logo {
+  width: 38px;
+  height: 38px;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #172534,
+      #07131d
+    );
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel-logo-dot {
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+
+  background: #29d8ff;
+
+  box-shadow:
+    0 0 10px #29d8ff;
+}
+
+.panel-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.panel-subtitle {
+  margin-top: 2px;
+
+  font-size: 11px;
+
+  color: #8b96a5;
+}
 
 .close-button {
-    width: 32px;
-    height: 32px;
+  width: 32px;
+  height: 32px;
 
-    border: none;
+  border: none;
 
-    border-radius: 50%;
+  background: transparent;
 
-    background: transparent;
+  border-radius: 50%;
 
-    font-size: 25px;
+  font-size: 24px;
 
-    line-height: 1;
+  color: #667085;
 
-    cursor: pointer;
-
-    color: #555;
+  cursor: pointer;
 }
 
 .close-button:hover {
-    background: #eeeeee;
+  background: #f1f3f5;
 }
 
 
-/* -------------------------------- */
-/* GREETING MESSAGE                 */
-/* -------------------------------- */
+/* =====================================================
+   PANEL MESSAGE
+===================================================== */
 
 .panel-message {
-    display: flex;
+  display: flex;
 
-    align-items: center;
+  gap: 12px;
 
-    gap: 15px;
+  padding: 20px;
 
-    padding: 25px 20px;
+  font-size: 14px;
 
-    font-size: 15px;
+  color: #344054;
+}
 
-    color: #333;
+.message-icon {
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #162534,
+      #08131e
+    );
+
+  color: #55e5ff;
+
+  font-size: 10px;
+
+  font-weight: 700;
 }
 
 
-/* Small robot */
+/* =====================================================
+   RESULT BOX
+===================================================== */
 
-.small-robot {
-    font-size: 45px;
+.result-box {
+  margin:
+    0 16px 12px;
 
-    user-select: none;
+  padding:
+    13px 15px;
+
+  background: #f7f9fb;
+
+  border:
+    1px solid #edf0f3;
+
+  border-radius: 14px;
+
+  font-size: 13px;
+
+  color: #344054;
+}
+
+.result-box p {
+  margin:
+    7px 0 0;
+
+  line-height: 1.5;
+}
+
+.user-result {
+  background: #effaff;
+}
+
+.result-label {
+  font-size: 9px;
+
+  font-weight: 700;
+
+  letter-spacing: 1px;
+
+  color: #7b8794;
 }
 
 
-/* -------------------------------- */
-/* VOICE AREA                       */
-/* -------------------------------- */
+/* =====================================================
+   VOICE
+===================================================== */
 
 .voice-area {
-    display: flex;
+  text-align: center;
 
-    flex-direction: column;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding: 25px 20px;
-
-    background: #f6f6f6;
+  padding:
+    15px 20px 20px;
 }
-
-
-/* Microphone button */
 
 .mic-button {
-    width: 70px;
-    height: 70px;
+  width: 64px;
+  height: 64px;
 
-    border: none;
+  border-radius: 50%;
 
-    border-radius: 50%;
+  border:
+    1px solid #dce2e8;
 
-    background: #4f46e5;
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #edf1f5
+    );
 
-    color: white;
+  font-size: 20px;
 
-    font-size: 30px;
+  cursor: pointer;
 
-    cursor: pointer;
+  box-shadow:
+    0 6px 18px rgba(
+      0,
+      0,
+      0,
+      0.1
+    );
 
-    box-shadow:
-        0 5px 15px rgba(0, 0, 0, 0.20);
-
-    transition:
-        transform 0.2s,
-        box-shadow 0.2s;
+  transition: 0.2s ease;
 }
-
 
 .mic-button:hover {
-    transform: scale(1.08);
-
-    box-shadow:
-        0 7px 20px rgba(0, 0, 0, 0.30);
+  transform: scale(1.07);
 }
 
+.mic-button.recording {
+  background: #101d29;
 
-.mic-button:active {
-    transform: scale(0.95);
+  color: white;
+
+  border-color: #16c9f4;
+
+  box-shadow:
+    0 0 0 7px rgba(
+      22,
+      201,
+      244,
+      0.12
+    ),
+    0 0 25px rgba(
+      22,
+      201,
+      244,
+      0.35
+    );
+
+  animation: micPulse 1.2s infinite;
 }
 
+@keyframes micPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
 
-/* Text below microphone */
-
-.voice-area p {
-    margin-top: 12px;
-
-    margin-bottom: 0;
-
-    font-size: 13px;
-
-    color: #666;
-
-    text-align: center;
+  50% {
+    transform: scale(1.06);
+  }
 }
 
+.voice-status {
+  margin-top: 10px;
 
-/* -------------------------------- */
-/* ROBOT FLOATING ANIMATION         */
-/* -------------------------------- */
+  font-size: 12px;
 
-@keyframes floating {
-
-    0% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-8px);
-    }
-
-    100% {
-        transform: translateY(0);
-    }
-}
-
-
-/* -------------------------------- */
-/* PANEL APPEAR ANIMATION           */
-/* -------------------------------- */
-
-@keyframes panelAppear {
-
-    from {
-        opacity: 0;
-
-        transform:
-            translateY(15px)
-            scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-
-        transform:
-            translateY(0)
-            scale(1);
-    }
+  color: #7a8594;
 }
