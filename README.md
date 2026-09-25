@@ -1,9 +1,7 @@
-Yes — you want **clean Markdown that you can copy directly into GitHub's `README.md` editor**.
 
-Copy everything below:
 
 ````markdown
-# DeskPilot – AI Operating System Assistant
+# DeskPilot – AI-powered Desktop Assistant
 
 DeskPilot is an AI-powered desktop assistant designed to interact with a Windows computer using natural-language commands.
 
@@ -586,7 +584,7 @@ DeskPilot is currently under active development.
 
 ## Team
 
-**DeskPilot – AI Desktop Assistant**
+**DeskPilot – AI-powered Desktop Assistant**
 
 Developed as a final-year major project.
 
