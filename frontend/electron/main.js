@@ -8,6 +8,7 @@ const path = require("path");
 
 let mainWindow;
 
+
 function createWindow() {
 
     const display = screen.getPrimaryDisplay();

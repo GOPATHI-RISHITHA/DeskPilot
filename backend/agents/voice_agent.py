@@ -61,6 +61,25 @@ Do not explain.
 Do not summarize.
 Do not add quotation marks.
 
+IMPORTANT EMAIL RULES:
+- If the user speaks an email address, preserve it exactly.
+- Never convert an email address into a person's name.
+- Never replace an email address with a contact name.
+- Preserve the username, @ symbol, domain, and dots.
+- If the user clearly says "at" and "dot" while spelling an email
+  address, convert them to @ and . respectively.
+- Do not autocorrect or guess an email address.
+
+Example:
+If the user says:
+rishithagopathi@gmail.com
+
+The transcription MUST be:
+rishithagopathi@gmail.com
+
+NOT:
+Rishitha Gupati@gmail.com
+
 Preserve technical terms such as:
 DBMS, SQL, Java, Python, GitHub, VS Code,
 Docker, Spring Boot, PostgreSQL, React, API.

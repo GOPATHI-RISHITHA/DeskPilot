@@ -1404,3 +1404,257 @@ body {
 
   color: #7a8594;
 }
+/* =========================================================
+   EMAIL CONFIRMATION CARD
+========================================================= */
+
+.email-confirmation {
+  margin: 14px 16px 16px;
+  padding: 16px;
+
+  border: 1px solid rgba(0, 210, 240, 0.28);
+  border-radius: 16px;
+
+  background: rgba(10, 20, 32, 0.96);
+
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.35),
+    inset 0 0 20px rgba(0, 220, 255, 0.04);
+
+  color: #e8f0f5;
+}
+
+
+/* =========================================================
+   EMAIL HEADER
+========================================================= */
+
+.email-confirmation-header {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 15px;
+}
+
+.email-icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+
+  background: rgba(0, 220, 255, 0.1);
+
+  border: 1px solid rgba(0, 220, 255, 0.25);
+
+  color: #00d9ff;
+
+  font-size: 18px;
+}
+
+.email-title {
+  font-size: 14px;
+
+  font-weight: 700;
+
+  color: #ffffff;
+}
+
+.email-subtitle {
+  margin-top: 3px;
+
+  font-size: 11px;
+
+  color: #8d9baa;
+}
+
+
+/* =========================================================
+   EMAIL DETAILS
+========================================================= */
+
+.email-details {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 11px;
+}
+
+.email-field {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.email-field-label {
+  font-size: 10px;
+
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.7px;
+
+  color: #6f8292;
+}
+
+.email-field-value {
+  font-size: 12px;
+
+  color: #e8f0f5;
+
+  word-break: break-word;
+
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   EMAIL BODY
+========================================================= */
+
+.email-body-field {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.email-body {
+  max-height: 110px;
+
+  overflow-y: auto;
+
+  padding: 10px;
+
+  border-radius: 9px;
+
+  background: rgba(255, 255, 255, 0.035);
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+
+  color: #d7e2e9;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+
+  white-space: pre-wrap;
+
+  word-break: break-word;
+}
+
+
+/* =========================================================
+   WARNING
+========================================================= */
+
+.email-warning {
+  margin-top: 13px;
+
+  padding: 9px 10px;
+
+  border-radius: 8px;
+
+  background: rgba(255, 190, 60, 0.07);
+
+  border: 1px solid rgba(255, 190, 60, 0.16);
+
+  color: #c9b98a;
+
+  font-size: 10px;
+
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   EMAIL ACTION BUTTONS
+========================================================= */
+
+.email-actions {
+  display: flex;
+
+  gap: 8px;
+
+  margin-top: 14px;
+}
+
+.email-cancel-button,
+.email-send-button {
+  flex: 1;
+
+  padding: 9px 10px;
+
+  border-radius: 9px;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease,
+    background 0.15s ease;
+}
+
+.email-cancel-button:hover,
+.email-send-button:hover {
+  transform: translateY(-1px);
+}
+
+.email-cancel-button:disabled,
+.email-send-button:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.55;
+
+  transform: none;
+}
+
+
+/* =========================================================
+   CANCEL BUTTON
+========================================================= */
+
+.email-cancel-button {
+  background: rgba(255, 255, 255, 0.05);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  color: #cbd5dc;
+}
+
+.email-cancel-button:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+
+/* =========================================================
+   SEND BUTTON
+========================================================= */
+
+.email-send-button {
+  background: rgba(0, 210, 240, 0.14);
+
+  border: 1px solid rgba(0, 220, 255, 0.35);
+
+  color: #65eaff;
+}
+
+.email-send-button:hover {
+  background: rgba(0, 220, 255, 0.22);
+}

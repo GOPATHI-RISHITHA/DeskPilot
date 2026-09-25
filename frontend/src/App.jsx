@@ -769,15 +769,104 @@ import "./App.css";
 function App() {
   const [open, setOpen] = useState(false);
   const [recording, setRecording] = useState(false);
+
   const [status, setStatus] = useState(
     "Click the robot and speak"
   );
+
   const [transcript, setTranscript] = useState("");
   const [response, setResponse] = useState("");
+
   const [avatarState, setAvatarState] = useState("idle");
+
+  // =========================================================
+  // EMAIL CONFIRMATION STATE
+  // =========================================================
+
+  const [pendingEmail, setPendingEmail] = useState(null);
+  const [emailActionLoading, setEmailActionLoading] =
+    useState(false);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+
+  // =========================================================
+  // SPEAK DESKPILOT RESPONSE
+  // =========================================================
+
+  const speakResponse = (text) => {
+  if (!text || !("speechSynthesis" in window)) {
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utterance =
+    new SpeechSynthesisUtterance(text);
+
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+
+  const voices =
+    window.speechSynthesis.getVoices();
+
+  const femaleVoice = voices.find((voice) =>
+    /female|zira|samantha|aria|jenny|sara/i.test(voice.name) &&
+    voice.lang.startsWith("en")
+  );
+
+  if (femaleVoice) {
+    utterance.voice = femaleVoice;
+  }
+
+  utterance.onstart = () => {
+    setAvatarState("speaking");
+    setStatus("DeskPilot is speaking...");
+  };
+
+  utterance.onend = () => {
+    setAvatarState("completed");
+    setStatus("Command completed");
+
+    setTimeout(() => {
+      setAvatarState("idle");
+    }, 1500);
+  };
+
+  utterance.onerror = () => {
+    setAvatarState("completed");
+    setStatus("Command completed");
+
+    setTimeout(() => {
+      setAvatarState("idle");
+    }, 1500);
+  };
+
+  window.speechSynthesis.speak(utterance);
+};
+
+  // =========================================================
+  // CHECK FOR EMAIL CONFIRMATION
+  // =========================================================
+
+  const checkForEmailConfirmation = (data) => {
+    if (
+      data?.response &&
+      typeof data.response === "object" &&
+      data.response.status === "pending_confirmation"
+    ) {
+      setPendingEmail(data.response);
+
+      return true;
+    }
+
+    return false;
+  };
+
+  // =========================================================
+  // START RECORDING
+  // =========================================================
 
   const startRecording = async () => {
     try {
@@ -790,14 +879,17 @@ function App() {
           audio: true,
         });
 
-      const recorder = new MediaRecorder(stream);
+      const recorder =
+        new MediaRecorder(stream);
 
       mediaRecorderRef.current = recorder;
       audioChunksRef.current = [];
 
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
+          audioChunksRef.current.push(
+            event.data
+          );
         }
       };
 
@@ -820,36 +912,61 @@ function App() {
 
       setRecording(true);
       setAvatarState("listening");
+
       setStatus("Listening...");
       setTranscript("");
       setResponse("");
 
     } catch (error) {
-      console.error("Microphone error:", error);
+      console.error(
+        "Microphone error:",
+        error
+      );
 
       setRecording(false);
       setAvatarState("error");
-      setStatus("Microphone permission denied");
+
+      setStatus(
+        "Microphone permission denied"
+      );
     }
   };
+
+  // =========================================================
+  // STOP RECORDING
+  // =========================================================
 
   const stopRecording = () => {
     if (
       mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== "inactive"
+      mediaRecorderRef.current.state !==
+        "inactive"
     ) {
       mediaRecorderRef.current.stop();
 
       setRecording(false);
+
       setAvatarState("thinking");
-      setStatus("DeskPilot is thinking...");
+
+      setStatus(
+        "DeskPilot is thinking..."
+      );
     }
   };
 
-  const sendVoiceCommand = async (audioBlob) => {
+  // =========================================================
+  // SEND VOICE COMMAND
+  // =========================================================
+
+  const sendVoiceCommand = async (
+    audioBlob
+  ) => {
     try {
       setAvatarState("thinking");
-      setStatus("DeskPilot is thinking...");
+
+      setStatus(
+        "DeskPilot is thinking..."
+      );
 
       const formData = new FormData();
 
@@ -871,77 +988,68 @@ function App() {
 
       if (!res.ok) {
         throw new Error(
-          data.detail || "Voice command failed"
+          data.detail ||
+            "Voice command failed"
         );
       }
 
-      const userTranscript =
-        data.transcript || "";
+      setTranscript(
+        data.transcript || ""
+      );
+
+      // =====================================================
+      // EMAIL CONFIRMATION
+      // =====================================================
+
+      const confirmationRequired =
+        checkForEmailConfirmation(data);
+
+      if (confirmationRequired) {
+        const confirmationMessage =
+          "The email is ready. Please review it and confirm before sending.";
+
+        setResponse(
+          confirmationMessage
+        );
+
+        setAvatarState("completed");
+
+        setStatus(
+          "Waiting for your confirmation"
+        );
+
+        speakResponse(
+          confirmationMessage
+        );
+
+        return;
+      }
+
+      // =====================================================
+      // NORMAL RESPONSE
+      // =====================================================
 
       const spokenResponse =
-        typeof data.response === "string"
+        typeof data.response ===
+        "string"
           ? data.response
-          : JSON.stringify(data.response);
+          : JSON.stringify(
+              data.response
+            );
 
-      setTranscript(userTranscript);
-      setResponse(spokenResponse);
-
-      if (
-        "speechSynthesis" in window &&
+      setResponse(
         spokenResponse
-      ) {
-        window.speechSynthesis.cancel();
+      );
 
-        const utterance =
-          new SpeechSynthesisUtterance(
-            spokenResponse
-          );
+      setAvatarState("completed");
 
-        utterance.rate = 1;
-        utterance.pitch = 1;
-        utterance.volume = 1;
+      setStatus(
+        "Command completed"
+      );
 
-        const voices =
-          window.speechSynthesis.getVoices();
-
-        const englishVoice =
-          voices.find((voice) =>
-            voice.lang.startsWith("en")
-          );
-
-        if (englishVoice) {
-          utterance.voice = englishVoice;
-        }
-
-        utterance.onstart = () => {
-          setAvatarState("speaking");
-          setStatus("DeskPilot is speaking...");
-        };
-
-        utterance.onend = () => {
-          setAvatarState("completed");
-          setStatus("Command completed");
-
-          setTimeout(() => {
-            setAvatarState("idle");
-          }, 1500);
-        };
-
-        utterance.onerror = () => {
-          setAvatarState("completed");
-          setStatus("Command completed");
-        };
-
-        window.speechSynthesis.speak(utterance);
-
-      } else {
-        setAvatarState("completed");
-        setStatus("Command completed");
-
-        setTimeout(() => {
-          setAvatarState("idle");
-        }, 1500);
-      }
+      speakResponse(
+        spokenResponse
+      );
 
     } catch (error) {
       console.error(
@@ -950,130 +1058,348 @@ function App() {
       );
 
       setAvatarState("error");
-      setStatus("Something went wrong");
+
+      setStatus(
+        "Something went wrong"
+      );
 
       setResponse(
         error.message ||
-        "Voice command failed."
+          "Voice command failed."
       );
     }
   };
 
+  // =========================================================
+  // CONFIRM EMAIL SEND
+  // =========================================================
+
+  const confirmEmailSend = async () => {
+  if (!pendingEmail?.confirmation_id) {
+    setResponse("Confirmation ID is missing.");
+    setStatus("Email sending failed");
+    return;
+  }
+
+  try {
+    setEmailActionLoading(true);
+    setStatus("Sending email...");
+
+    console.log(
+      "Sending confirmation ID:",
+      pendingEmail.confirmation_id
+    );
+
+    const res = await fetch(
+      "http://127.0.0.1:8000/api/email/confirm-send",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          confirmation_id: pendingEmail.confirmation_id,
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    console.log("Confirm-send response:", data);
+
+    if (!res.ok) {
+      throw new Error(
+        data.detail ||
+        data.message ||
+        "Failed to send email."
+      );
+    }
+
+    // Email was successfully sent
+    setPendingEmail(null);
+
+    setResponse(
+      data.message || "Email sent successfully."
+    );
+
+    setStatus("Email sent successfully");
+
+    speakResponse(
+      data.message || "Email sent successfully."
+    );
+
+  } catch (error) {
+    console.error(
+      "Email confirmation error:",
+      error
+    );
+
+    setResponse(
+      "Email could not be sent: " +
+      (error.message || "Unknown error")
+    );
+
+    setStatus("Email sending failed");
+
+  } finally {
+    setEmailActionLoading(false);
+  }
+};
+  // =========================================================
+  // CANCEL EMAIL SEND
+  // =========================================================
+
+  const cancelEmailSend = async () => {
+    if (
+      !pendingEmail?.confirmation_id
+    ) {
+      return;
+    }
+
+    try {
+      setEmailActionLoading(true);
+
+      setAvatarState("thinking");
+
+      setStatus(
+        "Cancelling email..."
+      );
+
+      const res = await fetch(
+        "http://127.0.0.1:8000/api/email/cancel-send",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+            Accept:
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            confirmation_id:
+              pendingEmail.confirmation_id,
+          }),
+        }
+      );
+
+      const data =
+        await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.detail ||
+            "Failed to cancel email"
+        );
+      }
+
+      setPendingEmail(null);
+
+      setResponse(
+        data.message ||
+          "Email sending cancelled."
+      );
+
+      setAvatarState("completed");
+
+      setStatus(
+        "Email cancelled"
+      );
+
+      speakResponse(
+        data.message ||
+          "Email sending cancelled."
+      );
+
+    } catch (error) {
+      console.error(
+        "Email cancellation error:",
+        error
+      );
+
+      setAvatarState("error");
+
+      setStatus(
+        "Cancellation failed"
+      );
+
+      setResponse(
+        error.message
+      );
+
+    } finally {
+      setEmailActionLoading(
+        false
+      );
+    }
+  };
+
+  // =========================================================
+  // UI
+  // =========================================================
+
   return (
     <div className="deskpilot">
 
-      {/* ======================================
+      {/* =====================================================
           DESKPILOT 3D ROBOT
-      ====================================== */}
+      ===================================================== */}
 
       <div
         className={`avatar avatar-${avatarState}`}
         onClick={() => setOpen(!open)}
+        title="Open DeskPilot"
       >
 
         {/* Energy effects */}
+
         <div className="energy energy-1"></div>
         <div className="energy energy-2"></div>
         <div className="energy energy-3"></div>
 
+
         {/* Robot */}
+
         <div className="robot">
 
           {/* Antenna */}
+
           <div className="antenna">
             <div className="antenna-ball"></div>
           </div>
 
+
           {/* Head */}
+
           <div className="robot-head">
 
             <div className="head-shine"></div>
 
+
             {/* Left ear */}
+
             <div className="ear ear-left">
               <div className="ear-core"></div>
             </div>
 
+
             {/* Right ear */}
+
             <div className="ear ear-right">
               <div className="ear-core"></div>
             </div>
 
+
             {/* Face screen */}
+
             <div className="face-screen">
 
               <div className="eye eye-left"></div>
+
               <div className="eye eye-right"></div>
 
               <div className="robot-mouth"></div>
 
             </div>
+
           </div>
 
+
           {/* Neck */}
+
           <div className="neck"></div>
 
+
           {/* Body */}
+
           <div className="robot-body">
 
             <div className="body-shine"></div>
 
             <div className="chest-light"></div>
 
+
             {/* Arms */}
+
             <div className="arm arm-left"></div>
+
             <div className="arm arm-right"></div>
 
           </div>
 
+
           {/* Floating base */}
+
           <div className="hover-base">
+
             <div className="hover-light"></div>
+
           </div>
 
         </div>
 
+
         {/* Branding */}
+
         <div className="robot-brand">
+
           <span className="status-dot"></span>
+
           <span>DeskPilot</span>
+
         </div>
+
+
+        {/* Status */}
 
         <div className="robot-status">
 
-          {avatarState === "idle" && "Ready"}
+          {avatarState === "idle" &&
+            "Ready"}
 
-          {avatarState === "listening" && "Listening"}
+          {avatarState === "listening" &&
+            "Listening"}
 
-          {avatarState === "thinking" && "Thinking"}
+          {avatarState === "thinking" &&
+            "Thinking"}
 
-          {avatarState === "speaking" && "Speaking"}
+          {avatarState === "speaking" &&
+            "Speaking"}
 
-          {avatarState === "completed" && "Completed"}
+          {avatarState === "completed" &&
+            "Completed"}
 
-          {avatarState === "error" && "Attention"}
+          {avatarState === "error" &&
+            "Attention"}
 
         </div>
 
       </div>
 
 
-      {/* ======================================
+      {/* =====================================================
           ASSISTANT PANEL
-      ====================================== */}
+      ===================================================== */}
 
       {open && (
         <div className="assistant-panel">
+
+          {/* Header */}
 
           <div className="panel-header">
 
             <div className="panel-title">
 
               <div className="panel-logo">
+
                 <div className="panel-logo-dot"></div>
+
               </div>
 
               <div>
+
                 <div className="panel-name">
                   DeskPilot
                 </div>
@@ -1081,9 +1407,11 @@ function App() {
                 <div className="panel-subtitle">
                   AI Operating Assistant
                 </div>
+
               </div>
 
             </div>
+
 
             <button
               className="close-button"
@@ -1095,6 +1423,8 @@ function App() {
           </div>
 
 
+          {/* Greeting */}
+
           <div className="panel-message">
 
             <div className="message-icon">
@@ -1102,13 +1432,34 @@ function App() {
             </div>
 
             <div>
-              <strong>Hello!</strong>
+
+              <strong>
+                Hello!
+              </strong>
+
               <br />
+
               What can I do for you?
+
             </div>
 
           </div>
 
+
+          {/* Status */}
+
+          <div
+            className="voice-status"
+            style={{
+              padding:
+                "0 20px 10px",
+            }}
+          >
+            {status}
+          </div>
+
+
+          {/* User transcript */}
 
           {transcript && (
             <div className="result-box user-result">
@@ -1117,45 +1468,178 @@ function App() {
                 YOU
               </div>
 
-              <p>{transcript}</p>
+              <p>
+                {transcript}
+              </p>
 
             </div>
           )}
 
 
-          {response && (
-            <div className="result-box">
+          {/* DeskPilot response */}
 
-              <div className="result-label">
-                DESKPILOT
+          {response &&
+            !pendingEmail && (
+              <div className="result-box">
+
+                <div className="result-label">
+                  DESKPILOT
+                </div>
+
+                <p>
+                  {response}
+                </p>
+
+              </div>
+            )}
+
+
+          {/* =================================================
+              EMAIL CONFIRMATION CARD
+          ================================================= */}
+
+          {pendingEmail && (
+
+            <div className="email-confirmation">
+
+              <div className="email-confirmation-header">
+
+                <div className="email-icon">
+                  ✉
+                </div>
+
+                <div>
+
+                  <div className="email-title">
+                    Confirm Email
+                  </div>
+
+                  <div className="email-subtitle">
+                    Review before sending
+                  </div>
+
+                </div>
+
               </div>
 
-              <p>{response}</p>
+
+              <div className="email-details">
+
+                <div className="email-field">
+
+                  <span className="email-field-label">
+                    To
+                  </span>
+
+                  <span className="email-field-value">
+                    {pendingEmail.recipient}
+                  </span>
+
+                </div>
+
+
+                <div className="email-field">
+
+                  <span className="email-field-label">
+                    Subject
+                  </span>
+
+                  <span className="email-field-value">
+                    {pendingEmail.subject}
+                  </span>
+
+                </div>
+
+
+                <div className="email-body-field">
+
+                  <span className="email-field-label">
+                    Message
+                  </span>
+
+                  <div className="email-body">
+                    {pendingEmail.body}
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div className="email-warning">
+                This email will not be sent until you confirm.
+              </div>
+
+
+              <div className="email-actions">
+
+                <button
+                  className="email-cancel-button"
+                  onClick={cancelEmailSend}
+                  disabled={
+                    emailActionLoading
+                  }
+                >
+                  Cancel
+                </button>
+
+
+                <button
+                  className="email-send-button"
+                  onClick={confirmEmailSend}
+                  disabled={
+                    emailActionLoading
+                  }
+                >
+                  {emailActionLoading
+                    ? "Processing..."
+                    : "Send Email"}
+                </button>
+
+              </div>
 
             </div>
           )}
 
 
-          <div className="voice-area">
+          {/* =================================================
+              VOICE AREA
+          ================================================= */}
 
-            <button
-              className={`mic-button ${
-                recording ? "recording" : ""
-              }`}
-              onClick={
-                recording
-                  ? stopRecording
-                  : startRecording
-              }
-            >
-              {recording ? "■" : "🎙"}
-            </button>
+          {!pendingEmail && (
 
-            <div className="voice-status">
-              {status}
+            <div className="voice-area">
+
+              <button
+                className={`mic-button ${
+                  recording
+                    ? "recording"
+                    : ""
+                }`}
+                onClick={
+                  recording
+                    ? stopRecording
+                    : startRecording
+                }
+              >
+
+                {recording
+                  ? "■"
+                  : "🎙"}
+
+              </button>
+
+              <div className="voice-status">
+
+                {recording
+                  ? "Listening..."
+                  : "Click the microphone and speak"}
+
+              </div>
+
             </div>
 
-          </div>
+          )}
 
         </div>
       )}

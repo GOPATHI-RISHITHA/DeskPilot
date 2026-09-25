@@ -27,7 +27,22 @@ from agents.system_agent import (
     set_brightness
 )
 
+from core.confirmation_manager import (
+    create_confirmation,
+    get_confirmation,
+    confirm_confirmation,
+    cancel_confirmation,
+    remove_confirmation
+)
 
+from agents.email_agent import (
+    prepare_email_send,
+    search_emails,
+    list_unread_emails,
+    read_email,
+    create_email_draft,
+    send_email,
+)
 # ============================================================
 # FASTAPI APPLICATION
 # ============================================================
@@ -86,6 +101,14 @@ class ControlRequest(BaseModel):
 class CommandRequest(BaseModel):
     command: str
 
+class EmailSendRequest(BaseModel):
+    recipient: str
+    subject: str
+    body: str
+
+
+class EmailConfirmationRequest(BaseModel):
+    confirmation_id: str
 
 # ============================================================
 # ROOT
@@ -314,6 +337,122 @@ async def api_voice_command(audio: UploadFile = File(...)):
             status_code=500,
             detail=str(e)
         )
+
+# ============================================================
+# EMAIL CONFIRMATION
+# ============================================================
+
+@app.post("/api/email/prepare-send")
+def api_prepare_email_send(request: EmailSendRequest):
+
+    confirmation = create_confirmation(
+        action="send_email",
+        recipient=request.recipient,
+        subject=request.subject,
+        body=request.body
+    )
+
+    return {
+        "status": "pending_confirmation",
+        "message": "Email is ready to be sent. User confirmation is required.",
+        "confirmation": confirmation
+    }
+
+
+@app.post("/api/email/confirm-send")
+def api_confirm_email_send(request: EmailConfirmationRequest):
+
+    confirmation = get_confirmation(
+        request.confirmation_id
+    )
+
+    if confirmation is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Confirmation not found."
+        )
+
+    if confirmation["status"] != "pending":
+
+        raise HTTPException(
+            status_code=400,
+            detail=f"Confirmation is already {confirmation['status']}."
+        )
+
+    confirmed = confirm_confirmation(
+        request.confirmation_id
+    )
+
+    if confirmed is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Confirmation not found."
+        )
+
+    result = send_email(
+        confirmed["recipient"],
+        confirmed["subject"],
+        confirmed["body"]
+    )
+
+    if result.get("status") != "success":
+
+        # If sending fails, don't leave it marked as successfully sent.
+        return {
+            "status": "error",
+            "message": result.get(
+                "message",
+                "Failed to send email."
+            ),
+            "confirmation": confirmed
+        }
+
+    remove_confirmation(
+        request.confirmation_id
+    )
+
+    return {
+        "status": "success",
+        "message": "Email sent successfully.",
+        "email": {
+            "recipient": confirmed["recipient"],
+            "subject": confirmed["subject"]
+        }
+    }
+
+
+@app.post("/api/email/cancel-send")
+def api_cancel_email_send(request: EmailConfirmationRequest):
+
+    confirmation = get_confirmation(
+        request.confirmation_id
+    )
+
+    if confirmation is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Confirmation not found."
+        )
+
+    if confirmation["status"] != "pending":
+
+        raise HTTPException(
+            status_code=400,
+            detail=f"Confirmation is already {confirmation['status']}."
+        )
+
+    cancelled = cancel_confirmation(
+        request.confirmation_id
+    )
+
+    return {
+        "status": "cancelled",
+        "message": "Email sending cancelled.",
+        "confirmation": cancelled
+    }
 
 # ============================================================
 # START SERVER

@@ -36,6 +36,14 @@ from agents.system_agent import (
 
 from agents.web_agent import web_research
 
+from agents.email_agent import (
+    prepare_email_send,
+    search_emails,
+    list_unread_emails,
+    read_email,
+    create_email_draft,
+)
+
 
 # =========================================================
 # LOAD ENVIRONMENT VARIABLES
@@ -82,6 +90,12 @@ TOOL_MAP = {
     "get_system_stats": get_system_stats,
     "set_volume": set_volume,
     "set_brightness": set_brightness,
+
+    "search_emails": search_emails,
+    "list_unread_emails": list_unread_emails,
+    "read_email": read_email,
+    "create_email_draft": create_email_draft,
+    "prepare_email_send": prepare_email_send,
 }
 
 
@@ -169,6 +183,38 @@ IMPORTANT RULES:
     multi-step request.
 
 23. After all actions are complete, give a concise final response.
+
+24. For searching emails, use search_emails.
+
+25. For listing unread emails, use list_unread_emails.
+
+26. For reading a specific email, use read_email.
+
+27. For creating an email draft, use create_email_draft.
+
+28. When the user asks to search or find emails, use the Gmail
+    email tools instead of web_research.
+
+29. When searching emails, convert the user's natural-language
+    request into an appropriate Gmail search query.
+
+30. When the user asks to send an email, use prepare_email_send.
+
+31. NEVER call send_email directly.
+
+32. prepare_email_send only prepares the email and creates a
+    pending confirmation. It does NOT send the email.
+
+33. After prepare_email_send succeeds, tell the user that the
+    email is ready and requires confirmation before sending.
+
+34. Include the recipient and subject in the confirmation response.
+
+35. Never claim that an email was sent unless the email was
+    actually sent through the confirmation endpoint.
+
+36. Use run_command only when a dedicated tool cannot perform
+    the requested task.
 
 You are an action-oriented desktop assistant.
 """
@@ -664,6 +710,21 @@ def execute_user_query(query: str):
             )
 
             print(result)
+
+            # -------------------------------------------------
+            # EMAIL CONFIRMATION
+            # -------------------------------------------------
+
+            if (
+                isinstance(result, dict)
+                and result.get("status") == "pending_confirmation"
+            ):
+
+                print(
+                    "Email confirmation required."
+                )
+
+                return result
 
             # -------------------------------------------------
             # SEND RESULT BACK TO GEMINI
